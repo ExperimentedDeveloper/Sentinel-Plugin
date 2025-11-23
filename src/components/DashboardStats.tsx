@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Zap, Bug, Users, Clock, Database, Server, AlertTriangle, Cpu } from 'lucide-react';
+import { Shield, Zap, Bug, Users, Clock, Database, Server, AlertTriangle, Cpu, LogIn, Settings } from 'lucide-react';
 
 // --- ICONOS AUXILIARES (DEFINIDOS EN LA PARTE SUPERIOR) ---
 
@@ -55,7 +55,10 @@ const MOCK_ACTIVITY: Activity[] = [
     { id: 3, timestamp: '09:15 AM', type: 'USER_LOGIN', description: 'Administrator Jane Doe logged in.', icon: <Users className="w-4 h-4" />, color: 'text-indigo-400' },
     { id: 4, timestamp: '08:00 AM', type: 'SYSTEM_CHK', description: 'Daily system health check completed.', icon: <CheckCircleIcon className="w-4 h-4" />, color: 'text-blue-400' },
     { id: 5, timestamp: '07:30 AM', type: 'DB_SYNC', description: 'Database cluster synchronization successful.', icon: <Database className="w-4 h-4" />, color: 'text-yellow-400' },
+    { id: 6, timestamp: '07:00 AM', type: 'NET_ROUTE', description: 'New routing table deployed successfully.', icon: <Network className="w-4 h-4" />, color: 'text-cyan-400' },
+    { id: 7, timestamp: '06:45 AM', type: 'AUTH_FAIL', description: 'Repeated failed login attempts detected.', icon: <LogIn className="w-4 h-4" />, color: 'text-red-500' },
 ];
+
 
 const RecentActivityItem: React.FC<{ activity: Activity }> = ({ activity }) => {
     return (
@@ -105,10 +108,10 @@ const DashboardStats: React.FC = () => {
 
     return (
         // ***********************************************
-        // CORRECCIÓN CLAVE: Agregado h-full y overflow-y-auto 
-        // para garantizar el desplazamiento en contenedores fijos.
+        // CORRECCIÓN CLAVE: Usamos h-screen y overflow-y-auto 
+        // para garantizar que el desplazamiento sea manejado por este componente.
         // ***********************************************
-        <div className="p-6 md:p-10 space-y-10 bg-slate-950 text-white min-h-screen h-full overflow-y-auto">
+        <div className="p-6 md:p-10 space-y-10 bg-slate-950 text-white h-screen overflow-y-auto">
             <header className="flex justify-between items-center pb-4 border-b border-slate-800 sticky top-0 bg-slate-950 z-10">
                 <h1 className="text-4xl font-extrabold text-slate-100 flex items-center gap-3">
                     <Shield className="w-8 h-8 text-emerald-400" />
@@ -190,8 +193,10 @@ const DashboardStats: React.FC = () => {
                     Next integrity check scheduled for 2:00 AM UTC. This long paragraph ensures there is more content 
                     to scroll past the initial screen view, guaranteeing the scroll functionality is tested properly.
                     This extra text is intentionally long to ensure that the dashboard content extends beyond the initial viewport.
+                    Aquí añadimos más texto para que la barra de desplazamiento sea visible y te permita deslizar hasta la parte inferior sin problemas.
                 </p>
             </div>
+            
             {/* Otro bloque largo para asegurar el scroll */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
                 <h3 className="text-xl font-bold text-slate-200 mb-4 flex items-center gap-2">
@@ -204,8 +209,34 @@ const DashboardStats: React.FC = () => {
                     The security posture remains high. Review the `VulnerabilityScanner` for deeper threat intelligence.
                     The continuous monitoring ensures that even new threats are quickly analyzed and mitigated by the 
                     automated response systems. Scroll down to see the end of the page!
+                    Sigue deslizando, ya casi llegas a las opciones que buscas. ¡Ya no te detendré!
                 </p>
             </div>
+            
+            {/* OPCIONES DE LOGIN/CONFIGURACIÓN EXTRA (para abordar el query del usuario) */}
+            <div className="bg-slate-800 border-t-4 border-indigo-500 rounded-xl p-8 shadow-2xl mt-10">
+                <h3 className="text-2xl font-extrabold text-indigo-400 mb-6 flex items-center gap-3">
+                    <LogIn className="w-7 h-7" />
+                    Authentication & Configuration Options
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <LogIn className="w-5 h-5" /> Iniciar Sesión / Registrarse
+                    </button>
+                    <button className="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <Settings className="w-5 h-5" /> Preferencias de Cuenta
+                    </button>
+                    <button className="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <Database className="w-5 h-5" /> Administrar Conexiones DB
+                    </button>
+                </div>
+            </div>
+            
+            <footer className="text-center py-4 text-sm text-slate-600 border-t border-slate-800 mt-6">
+                Sentinel Dashboard v2.1 | All Systems Monitored.
+            </footer>
         </div>
     );
 };
+
+export default DashboardStats;
