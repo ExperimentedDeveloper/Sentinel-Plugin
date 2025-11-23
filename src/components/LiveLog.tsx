@@ -1,157 +1,173 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { INITIAL_LOGS } from '../constants';
-import { LogEntry } from '../types';
-import { Terminal, Activity, Send, ChevronRight, AlertOctagon } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Wifi, Zap, Terminal, AlertTriangle, Cloud, Code } from 'lucide-react';
+
+// --- DEFINICIONES INTERNAS (Solución para la dependencia faltante) ---
+
+type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'SUCCESS';
+
+interface LogEntry {
+    id: number;
+    timestamp: string;
+    level: LogLevel;
+    message: string;
+    component: string;
+}
+
+const MOCK_LOGS: LogEntry[] = [
+    { id: 1, timestamp: '10:00:01', level: 'INFO', message: 'System startup initiated.', component: 'CORE' },
+    { id: 2, timestamp: '10:00:02', level: 'SUCCESS', message: 'Network adapter initialized on port 8080.', component: 'NET' },
+    { id: 3, timestamp: '10:00:03', level: 'DEBUG', message: 'Checking resource utilization: CPU 12%, RAM 4GB.', component: 'MONITOR' },
+    { id: 4, timestamp: '10:00:05', level: 'WARN', message: 'Low priority thread queue exceeded maximum capacity (120/100).', component: 'SCHEDULER' },
+    { id: 5, timestamp: '10:00:06', level: 'INFO', message: 'Incoming connection established from IP 192.168.1.50.', component: 'NET' },
+];
+
+// --- FIN DE DEFINICIONES INTERNAS ---
+
 
 const LiveLog: React.FC = () => {
-  const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOGS);
-  const [command, setCommand] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+    const [liveLogs, setLiveLogs] = useState<LogEntry[]>(MOCK_LOGS);
+    const logContainerRef = useRef<HTMLDivElement>(null);
+    const [isRunning, setIsRunning] = useState(true);
 
-  // Auto-scroll
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
+    // Auto-scroll to the bottom of the logs
+    useEffect(() => {
+        if (logContainerRef.current) {
+            logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+        }
+    }, [liveLogs]);
 
-  // Background simulation logs
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) return; 
+    // Simulate real-time log stream
+    useEffect(() => {
+        if (!isRunning) return;
 
-      const actions = [
-        { msg: 'DDoS Mitigation: Dropped 450 packets.', src: 'DDoS-Shield', type: 'SUCCESS' as const },
-        { msg: 'X-Ray Monitor: Player "MinerSteve" found 3 Diamonds in 10s.', src: 'AntiXray', type: 'WARN' as const },
-        { msg: 'PacketLimiter: Cancelling high-rate packet stream.', src: 'Core', type: 'WARN' as const },
-        { msg: 'StaffMode: Admin_Sarah enabled Vanish mode.', src: 'StaffOps', type: 'STAFF' as const },
-      ];
-      
-      const randomAction = actions[Math.floor(Math.random() * actions.length)];
-      addLog(randomAction.type, randomAction.msg, randomAction.src);
-    }, 3000);
+        let nextId = liveLogs.length + 1;
+        const interval = setInterval(() => {
+            const newLog: LogEntry = {
+                id: nextId++,
+                timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }),
+                level: ['INFO', 'DEBUG', 'WARN', 'SUCCESS'][Math.floor(Math.random() * 4)] as LogLevel,
+                message: generateRandomMessage(),
+                component: generateRandomComponent(),
+            };
+            
+            setLiveLogs(prev => [...prev, newLog]);
+        }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+        return () => clearInterval(interval);
+    }, [isRunning]);
 
-  const addLog = (level: LogEntry['level'], message: string, source: string) => {
-    setLogs(prev => [...prev.slice(-99), {
-        id: Date.now(),
-        timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }),
-        level,
-        message,
-        source
-    }]);
-  };
+    const generateRandomMessage = (): string => {
+        const messages = [
+            'Processing incoming telemetry data...',
+            'Security policy enforcement check passed.',
+            'Database transaction commit successful.',
+            'Garbage Collection cycle initiated.',
+            'Attempting connection reconnection...',
+            'Service mesh health check OK.',
+            'User session updated.',
+        ];
+        return messages[Math.floor(Math.random() * messages.length)];
+    };
 
-  const handleCommandSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!command.trim()) return;
+    const generateRandomComponent = (): string => {
+        const components = ['API_GATEWAY', 'DB_HANDLER', 'AUTH_SVC', 'TELEMETRY', 'NET'];
+        return components[Math.floor(Math.random() * components.length)];
+    };
 
-    const cmd = command.trim();
-    setCommand('');
-    addLog('CMD', `> ${cmd}`, 'Admin');
-    setIsTyping(true);
-    setTimeout(() => {
-        processCommand(cmd);
-        setIsTyping(false);
-        inputRef.current?.focus();
-    }, 600 + Math.random() * 500);
-  };
+    const getLevelClass = (level: LogLevel): string => {
+        switch (level) {
+            case 'INFO': return 'text-blue-400';
+            case 'WARN': return 'text-yellow-400';
+            case 'ERROR': return 'text-red-500 font-bold';
+            case 'DEBUG': return 'text-gray-500';
+            case 'SUCCESS': return 'text-green-400';
+            default: return 'text-white';
+        }
+    };
 
-  const processCommand = (cmd: string) => {
-      const parts = cmd.split(' ');
-      const base = parts[0].toLowerCase();
-
-      switch(base) {
-          case '/sentinel':
-              if (parts[1] === 'alerts') {
-                  addLog('SUCCESS', 'Toggled Admin Alerts: [ENABLED]', 'Core');
-                  addLog('OUTPUT', 'You will now see: Hack Violations, X-Ray Alerts, Failed Logins.', 'Core');
-              } else if (parts[1] === 'xray') {
-                  const target = parts[2];
-                  if (!target) {
-                      addLog('WARN', 'Usage: /sentinel xray <player>', 'Core');
-                  } else {
-                      addLog('INFO', `Fetching Mining Stats for ${target}...`, 'AntiXray');
-                      setTimeout(() => {
-                          addLog('OUTPUT', `--- X-RAY ANALYSIS: ${target} ---`, 'AntiXray');
-                          addLog('OUTPUT', `Diamond Ore: 42 (Rate: HIGH)`, 'AntiXray');
-                          addLog('OUTPUT', `Netherite: 12 (Rate: NORMAL)`, 'AntiXray');
-                          addLog('OUTPUT', `Stone Mined: 405 (Ratio: 10%)`, 'AntiXray');
-                          addLog('OUTPUT', `Verdict: PROBABLE X-RAY`, 'AntiXray');
-                      }, 800);
-                  }
-              } else if (parts[1] === 'scan') {
-                  addLog('INFO', 'Scanning...', 'System');
-              } else {
-                  addLog('WARN', 'Unknown command. Try /sentinel alerts, /sentinel xray, /staff', 'System');
-              }
-              break;
-          default:
-              addLog('WARN', `Unknown command: ${base}`, 'System');
-      }
-  };
-
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'INFO': return 'text-blue-400';
-      case 'WARN': return 'text-yellow-400';
-      case 'CRITICAL': return 'text-red-500 font-bold';
-      case 'SUCCESS': return 'text-emerald-400';
-      case 'CMD': return 'text-white font-bold';
-      case 'OUTPUT': return 'text-slate-400';
-      case 'STAFF': return 'text-pink-400';
-      default: return 'text-slate-400';
+    const getIcon = (level: LogLevel) => {
+        switch (level) {
+            case 'INFO': return <Terminal className="w-3 h-3 text-blue-400" />;
+            case 'WARN': return <AlertTriangle className="w-3 h-3 text-yellow-400" />;
+            case 'ERROR': return <Zap className="w-3 h-3 text-red-500" />;
+            case 'DEBUG': return <Code className="w-3 h-3 text-gray-500" />;
+            case 'SUCCESS': return <CheckCircleIcon className="w-3 h-3 text-green-400" />;
+            default: return <Terminal className="w-3 h-3 text-white" />;
+        }
     }
-  };
 
-  return (
-    <div className="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden flex flex-col h-[600px] shadow-2xl relative font-mono">
-      <div className="bg-slate-900 p-3 border-b border-slate-800 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-slate-400" />
-          <span className="text-sm font-bold text-slate-300">Sentinel C2 Terminal</span>
+    return (
+        <div className="space-y-6 animate-in fade-in duration-500 h-full flex flex-col">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
+                        <Terminal className="w-8 h-8 text-cyan-500" />
+                        Live Operational Stream
+                    </h2>
+                    <p className="text-slate-500 text-sm">Real-time log aggregation and streaming from Sentinel agents.</p>
+                </div>
+                <button
+                    onClick={() => setIsRunning(prev => !prev)}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all ${
+                        isRunning 
+                            ? 'bg-red-700/50 hover:bg-red-700 border border-red-700 text-white' 
+                            : 'bg-green-700/50 hover:bg-green-700 border border-green-700 text-white'
+                    }`}
+                >
+                    {isRunning ? (
+                        <>
+                            <StopCircleIcon className="w-4 h-4" /> Pause Stream
+                        </>
+                    ) : (
+                        <>
+                            <PlayIcon className="w-4 h-4" /> Start Stream
+                        </>
+                    )}
+                </button>
+            </div>
+
+            <div className="bg-black border border-slate-800 rounded-xl overflow-hidden flex flex-col shadow-2xl flex-1 min-h-0">
+                <div className="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Cloud className="w-4 h-4 text-slate-400" />
+                        <span className="text-xs font-bold text-slate-300">Log Stream Endpoint: tcp://log-aggregator.internal:6000</span>
+                    </div>
+                    <span className="text-xs font-mono text-slate-500">Events: {liveLogs.length}</span>
+                </div>
+                
+                <div 
+                    ref={logContainerRef} 
+                    className="flex-1 p-4 font-mono text-[10px] sm:text-xs text-green-400 overflow-y-auto space-y-0.5"
+                    style={{ lineHeight: '1.4' }}
+                >
+                    {liveLogs.map((log) => (
+                        <div key={log.id} className="flex gap-2 animate-in fade-in duration-150 whitespace-nowrap">
+                            <span className="text-slate-600">{log.timestamp}</span>
+                            <span className={`font-bold ${getLevelClass(log.level)}`}>[{log.component}]</span>
+                            <span className={`${getLevelClass(log.level)}`}>{log.level}</span>
+                            <span className="text-slate-300 flex items-center gap-1">
+                                {getIcon(log.level)}
+                                {log.message}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">
-            <Activity className="w-3 h-3 text-emerald-500 animate-pulse" />
-            <span className="text-[10px] text-emerald-400">ONLINE</span>
-        </div>
-      </div>
-
-      <div className="flex-1 p-4 overflow-y-auto text-xs space-y-1 bg-[#0d1117] relative z-10" onClick={() => inputRef.current?.focus()}>
-        {logs.map((log) => (
-          <div key={log.id} className={`flex items-start gap-3 p-0.5 ${log.level === 'CMD' ? 'mt-4 mb-2' : ''}`}>
-            <span className="text-slate-600 shrink-0 select-none">[{log.timestamp}]</span>
-            {log.level !== 'CMD' && log.level !== 'OUTPUT' && (
-                <span className="text-slate-600 shrink-0 w-24 text-right border-r border-slate-800 mr-2 pr-2 select-none">{log.source}</span>
-            )}
-            <span className={`break-all ${getLevelColor(log.level)}`}>
-                {log.level === 'OUTPUT' && <span className="text-slate-600 mr-2">↳</span>}
-                {log.message}
-            </span>
-          </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
-
-      <div className="p-3 bg-slate-900 border-t border-slate-800 flex items-center gap-2 relative z-30">
-        <ChevronRight className="w-4 h-4 text-emerald-500 animate-pulse" />
-        <form onSubmit={handleCommandSubmit} className="flex-1">
-            <input 
-                ref={inputRef}
-                type="text" 
-                value={command}
-                onChange={(e) => setCommand(e.target.value)}
-                className="w-full bg-transparent border-none outline-none text-slate-200 text-sm placeholder-slate-600"
-                placeholder="Try /sentinel alerts or /sentinel xray <player>..."
-                autoFocus
-                autoComplete="off"
-            />
-        </form>
-      </div>
-    </div>
-  );
+    );
 };
+
+// Componentes Icono Auxiliares (ya que no se exportan de lucide-react por defecto)
+const PlayIcon = ({className}: {className?: string}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="5 3 19 12 5 21 5 3"/></svg>
+)
+
+const StopCircleIcon = ({className}: {className?: string}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><rect width="6" height="6" x="9" y="9"/></svg>
+)
+
+const CheckCircleIcon = ({className}: {className?: string}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+)
 
 export default LiveLog;
