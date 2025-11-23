@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, UserCheck, ShieldCheck, AlertTriangle } from 'lucide-react';
-import { WhitelistedPlayer } from '../types';
 
 const WhitelistManager: React.FC = () => {
   const [players, setPlayers] = useState<WhitelistedPlayer[]>([]);

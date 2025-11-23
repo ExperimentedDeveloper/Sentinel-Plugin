@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Server, Database, Activity, Cpu, Network, HardDrive, CheckCircle, AlertTriangle, XCircle, Terminal, ShieldAlert, Lock } from 'lucide-react';
 import { AreaChart, Area, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { MOCK_SERVICES, MOCK_API_LOGS, PACKET_DATA } from '../constants';
+
 
 interface BackendMonitorProps {
   theme?: 'dark' | 'light';
