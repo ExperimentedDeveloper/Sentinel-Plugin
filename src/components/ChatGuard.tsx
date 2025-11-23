@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Lock, Trash2, Settings, ShieldCheck, AlertTriangle, EyeOff, Brain, Ban, AlignLeft, Percent, Repeat, CheckCircle, FlaskConical } from 'lucide-react';
-import { MOCK_CHAT_HISTORY } from '../constants';
+
 
 const ChatGuard: React.FC = () => {
   const [chatLock, setChatLock] = useState(false);
