@@ -102,7 +102,8 @@ const DashboardStats: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 h-full flex flex-col">
+        // Se elimina 'h-full' y 'flex flex-col' para que el contenedor crezca con el contenido y permita el scroll si es necesario.
+        <div className="space-y-6 animate-in fade-in duration-500 min-h-screen"> 
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
