@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>SentinelCiberSecurity Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+
+      code, pre, .font-mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1; 
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8; 
+      }
+
+      /* --- LIQUID LIGHT ANIMATION --- */
+      @keyframes liquid-light-flow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      .liquid-light-bg {
+        background: linear-gradient(-45deg, #f0f9ff, #e0f2fe, #f5f3ff, #ecfdf5);
+        background-size: 400% 400%;
+        animation: liquid-light-flow 15s ease infinite;
+      }
+
+      /* --- GLASSMORPHISM CARD --- */
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+      }
+
+      .glass-card-dark {
+         background: rgba(15, 23, 42, 0.6);
+         backdrop-filter: blur(12px);
+         border: 1px solid rgba(30, 41, 59, 0.5);
+      }
+
+      /* --- RGB FLOATING ANIMATIONS --- */
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-6px); }
+        100% { transform: translateY(0px); }
+      }
+
+      .float-card {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      /* --- RGB BORDER PULSE --- */
+      @keyframes rgb-border {
+        0% { border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
+        33% { border-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+        66% { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); }
+        100% { border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
+      }
+
+      .rgb-card {
+        animation: rgb-border 8s linear infinite;
+      }
+
+      /* --- LIQUID DROP EFFECT --- */
+      .liquid-drop {
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .liquid-drop::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s ease, height 0.6s ease;
+      }
+
+      .liquid-drop:hover::after {
+        width: 200%;
+        height: 200%;
+      }
+
+      /* --- LIQUID BG FOR BARS --- */
+      @keyframes liquid-flow {
+        0% { background-position: 0 0; }
+        100% { background-position: 50px 50px; }
+      }
+
+      .liquid-bg {
+        background-image: linear-gradient(
+          45deg,
+          rgba(255, 255, 255, 0.15) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(255, 255, 255, 0.15) 50%,
+          rgba(255, 255, 255, 0.15) 75%,
+          transparent 75%,
+          transparent
+        );
+        background-size: 20px 20px;
+        animation: liquid-flow 1s linear infinite;
+      }
+
+      /* --- PARALLAX TILT EFFECT --- */
+      .tilt-card {
+        transition: transform 0.1s ease, box-shadow 0.2s ease;
+        transform-style: preserve-3d;
+      }
+      
+      .tilt-card:hover {
+        transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateZ(10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        z-index: 10;
+      }
+
+      /* --- SKELETON LOADING --- */
+      @keyframes skeleton-pulse {
+        0% { background-color: rgba(255,255,255,0.05); }
+        50% { background-color: rgba(255,255,255,0.1); }
+        100% { background-color: rgba(255,255,255,0.05); }
+      }
+      
+      .skeleton {
+        animation: skeleton-pulse 1.5s infinite ease-in-out;
+        border-radius: 4px;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1"
+  }
+}
+</script>
+</head>
+  <body class="liquid-light-bg text-slate-800 antialiased selection:bg-indigo-500 selection:text-white overflow-hidden">
+    <div id="root"></div>
+  </body>
+</html>
