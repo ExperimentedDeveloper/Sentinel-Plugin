@@ -1,197 +1,151 @@
+import React, { useState, useEffect } from 'react';
+import { ShieldAlert, Zap, Server, BarChart, Bug, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react';
 
-import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { ShieldAlert, Radio, Zap, Database, Server, Activity, TrendingUp } from 'lucide-react';
-import { PACKET_DATA } from '../constants';
+// --- DEFINICIONES INTERNAS (Solución para la dependencia faltante) ---
+// Reusing types from sibling components for consistency
 
-interface DashboardStatsProps {
-  theme?: 'dark' | 'light';
+type PacketStatus = 'NORMAL' | 'ALERT' | 'DROPPED';
+type LogLevel = 'INFO' | 'WARN' | 'ERROR';
+type VulnerabilitySeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM';
+
+interface Metric {
+    id: string;
+    title: string;
+    value: string | number;
+    unit: string;
+    icon: React.ElementType;
+    color: string;
+    trend: 'up' | 'down' | 'neutral';
 }
 
-const DashboardStats: React.FC<DashboardStatsProps> = ({ theme = 'light' }) => {
-  const isDark = theme === 'dark';
-  
-  // Mock sparkline data
-  const sparkData = [10, 25, 15, 35, 20, 45, 40];
+const MOCK_METRICS: Metric[] = [
+    {
+        id: 'alerts',
+        title: 'Active Alerts (Network)',
+        value: 12,
+        unit: 'alerts',
+        icon: ShieldAlert,
+        color: 'text-red-400',
+        trend: 'up',
+    },
+    {
+        id: 'cves',
+        title: 'Critical Vulnerabilities',
+        value: 2,
+        unit: 'CVEs',
+        icon: Bug,
+        color: 'text-orange-400',
+        trend: 'up',
+    },
+    {
+        id: 'errors',
+        title: 'Log Stream Errors',
+        value: 45,
+        unit: '/min',
+        icon: Zap,
+        color: 'text-yellow-400',
+        trend: 'down',
+    },
+    {
+        id: 'traffic',
+        title: 'Network Traffic Rate',
+        value: 1.4,
+        unit: 'Gbps',
+        icon: BarChart,
+        color: 'text-green-400',
+        trend: 'up',
+    },
+];
 
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Threats Neutralized" 
-          value="2,401" 
-          sub="Last 24 hours" 
-          icon={ShieldAlert} 
-          color="text-red-400" 
-          bg="bg-red-500/10"
-          borderColor="border-red-500/20"
-          isDark={isDark}
-          sparkline={sparkData}
-        />
-        <StatCard 
-          title="Active Tunnels" 
-          value="142" 
-          sub="Encrypted Sessions" 
-          icon={Radio} 
-          color="text-blue-400" 
-          bg="bg-blue-500/10"
-          borderColor="border-blue-500/20"
-          isDark={isDark}
-          delay="0.2s"
-          sparkline={sparkData}
-        />
-        <StatCard 
-          title="Inbound PPS" 
-          value="450" 
-          sub="DDoS Filter Active" 
-          icon={Zap} 
-          color="text-yellow-400" 
-          bg="bg-yellow-500/10"
-          borderColor="border-yellow-500/20"
-          isDark={isDark}
-          delay="0.4s"
-          sparkline={sparkData}
-        />
-        <StatCard 
-          title="MySQL Latency" 
-          value="2ms" 
-          sub="AES-256-GCM Pool" 
-          icon={Database} 
-          color="text-emerald-400" 
-          bg="bg-emerald-500/10"
-          borderColor="border-emerald-500/20"
-          isDark={isDark}
-          delay="0.6s"
-          sparkline={sparkData}
-        />
-      </div>
+// --- FIN DE DEFINICIONES INTERNAS ---
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`lg:col-span-2 border rounded-xl p-6 shadow-2xl relative overflow-hidden group tilt-card ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
-            <div className="flex justify-between items-center mb-6">
-            <div>
-                <h2 className={`text-lg font-bold flex items-center gap-2 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                    <Activity className="w-5 h-5 text-emerald-400" />
-                    Network Traffic Analysis
-                </h2>
-                <p className="text-xs text-slate-500">Real-time packet entropy & DDoS mitigation.</p>
+const DashboardStats: React.FC = () => {
+    const [metrics, setMetrics] = useState<Metric[]>(MOCK_METRICS);
+
+    // Simulate real-time metric updates
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setMetrics(prevMetrics => prevMetrics.map(metric => {
+                if (metric.id === 'alerts') {
+                    // Alerts fluctuate
+                    const newValue = Math.max(0, metric.value as number + Math.floor(Math.random() * 3) - 1);
+                    return { ...metric, value: newValue, trend: newValue > metric.value ? 'up' : newValue < metric.value ? 'down' : 'neutral' };
+                }
+                if (metric.id === 'traffic') {
+                    // Traffic slowly rises/falls
+                    const currentRate = metric.value as number;
+                    const change = (Math.random() * 0.2 - 0.1); // +/- 0.1 Gbps
+                    const newRate = Math.max(0.5, parseFloat((currentRate + change).toFixed(1)));
+                    return { ...metric, value: newRate, trend: newRate > currentRate ? 'up' : newRate < currentRate ? 'down' : 'neutral' };
+                }
+                return metric;
+            }));
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const getTrendIcon = (trend: 'up' | 'down' | 'neutral') => {
+        if (trend === 'up') {
+            return <ArrowUp className="w-4 h-4 text-red-500" />;
+        }
+        if (trend === 'down') {
+            return <ArrowDown className="w-4 h-4 text-green-500" />;
+        }
+        return null;
+    };
+
+    const getTrendClass = (trend: 'up' | 'down' | 'neutral') => {
+        if (trend === 'up') return 'text-red-500 bg-red-900/20';
+        if (trend === 'down') return 'text-green-500 bg-green-900/20';
+        return 'text-slate-500 bg-slate-900/20';
+    };
+
+    return (
+        <div className="space-y-6 animate-in fade-in duration-500 h-full flex flex-col">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
+                        <Server className="w-8 h-8 text-emerald-500" />
+                        Operational Dashboard Summary
+                    </h2>
+                    <p className="text-slate-500 text-sm">Key metrics and security posture snapshot.</p>
+                </div>
             </div>
-            <div className="flex items-center space-x-2">
-                <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-400 ring-1 ring-inset ring-emerald-500/20 animate-pulse">
-                    LIVE
-                </span>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {metrics.map((metric) => (
+                    <div key={metric.id} className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl transition-all hover:border-indigo-500/50 hover:shadow-indigo-900/20">
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-sm font-semibold uppercase text-slate-500">{metric.title}</span>
+                            <div className={`p-2 rounded-lg ${metric.color} bg-slate-800`}>
+                                <metric.icon className="w-5 h-5" />
+                            </div>
+                        </div>
+                        
+                        <div className="flex items-end justify-between">
+                            <div className="text-4xl font-extrabold text-slate-100">
+                                {metric.value}
+                                <span className="text-base font-normal text-slate-500 ml-1">{metric.unit}</span>
+                            </div>
+                            
+                            <div className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded ${getTrendClass(metric.trend)}`}>
+                                {getTrendIcon(metric.trend)}
+                                {metric.trend === 'up' && 'Rising'}
+                                {metric.trend === 'down' && 'Stable'}
+                                {metric.trend === 'neutral' && 'Steady'}
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
-            </div>
-            <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={PACKET_DATA}>
-                <defs>
-                    <linearGradient id="colorPackets" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorThreshold" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                    </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#e2e8f0"} vertical={false} />
-                <XAxis dataKey="time" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                    contentStyle={{ backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? '#334155' : '#e2e8f0', borderRadius: '8px', color: isDark ? '#f1f5f9' : '#0f172a' }}
-                    itemStyle={{ color: isDark ? '#f1f5f9' : '#0f172a' }}
-                />
-                <Area type="monotone" dataKey="packets" stroke="#10b981" fillOpacity={1} fill="url(#colorPackets)" strokeWidth={2} name="Packets/sec" />
-                <Area type="monotone" dataKey="threshold" stroke="#ef4444" strokeDasharray="5 5" fillOpacity={1} fill="url(#colorThreshold)" strokeWidth={2} name="Mitigation Cap" />
-                </AreaChart>
-            </ResponsiveContainer>
+
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-slate-400 text-sm flex items-center gap-3 mt-6">
+                <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                <p>System health is **Nominal**. Current alert count is 12, primarily due to non-critical DNS anomalies. **No immediate intervention required.**</p>
             </div>
         </div>
-
-        <div className={`border rounded-xl p-6 flex flex-col relative overflow-hidden tilt-card ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-             <div className="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-             <h3 className={`font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                 <Server className="w-5 h-5 text-blue-400" />
-                 System Load
-             </h3>
-             
-             <div className="space-y-6 flex-1">
-                 <div>
-                     <div className="flex justify-between text-xs mb-2">
-                         <span className="text-slate-400 font-bold">CPU Usage</span>
-                         <span className="text-emerald-400 font-mono">12%</span>
-                     </div>
-                     <div className={`w-full h-2 rounded-full overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                         <div className="h-full bg-emerald-500 w-[12%] liquid-bg"></div>
-                     </div>
-                 </div>
-
-                 <div>
-                     <div className="flex justify-between text-xs mb-2">
-                         <span className="text-slate-400 font-bold">RAM (Heap)</span>
-                         <span className="text-blue-400 font-mono">4.2 GB / 16 GB</span>
-                     </div>
-                     <div className={`w-full h-2 rounded-full overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                         <div className="h-full bg-blue-500 w-[26%] liquid-bg"></div>
-                     </div>
-                 </div>
-
-                 <div>
-                     <div className="flex justify-between text-xs mb-2">
-                         <span className="text-slate-400 font-bold">Disk I/O (Logs)</span>
-                         <span className="text-purple-400 font-mono">45 MB/s</span>
-                     </div>
-                     <div className={`w-full h-2 rounded-full overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                         <div className="h-full bg-purple-500 w-[15%] liquid-bg"></div>
-                     </div>
-                 </div>
-
-                 <div className="mt-auto pt-4">
-                     <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'} float-card`}>
-                         <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Next Backup</p>
-                         <div className="flex justify-between items-center">
-                             <span className={`text-sm font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>04:00:00 AM</span>
-                             <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">AES-256</span>
-                         </div>
-                     </div>
-                 </div>
-             </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
-
-const StatCard = ({ title, value, sub, icon: Icon, color, bg, borderColor, isDark, delay, sparkline }: any) => (
-  <div className={`p-6 rounded-xl border relative overflow-hidden rgb-card tilt-card ${isDark ? `bg-slate-900 ${borderColor}` : 'bg-white border-slate-200'}`} style={{ animationDelay: delay }}>
-    <div className={`absolute top-0 right-0 p-4 opacity-10 ${color}`}>
-      <Icon className="w-16 h-16" />
-    </div>
-    <div className="relative z-10">
-      <div className="flex justify-between items-start">
-        <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(0,0,0,0.5)]`}>
-            <Icon className={`w-5 h-5 ${color}`} />
-        </div>
-        {sparkline && (
-             <div className="w-24 h-10">
-                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={sparkline.map((v: number, i: number) => ({ val: v, i }))}>
-                        <Line type="monotone" dataKey="val" stroke={color.includes('red') ? '#ef4444' : color.includes('blue') ? '#3b82f6' : '#eab308'} strokeWidth={2} dot={false} />
-                    </LineChart>
-                 </ResponsiveContainer>
-             </div>
-        )}
-      </div>
-      <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">{title}</p>
-      <h3 className={`text-2xl font-bold font-mono ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{value}</h3>
-      <p className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
-        <div className={`w-1.5 h-1.5 rounded-full ${color.replace('text-', 'bg-')} animate-pulse`}></div>
-        {sub}
-      </p>
-    </div>
-  </div>
-);
 
 export default DashboardStats;
