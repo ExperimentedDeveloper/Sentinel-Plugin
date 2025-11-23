@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Scan, ShieldAlert, FileCode, Activity, User, HardDrive, Search, AlertOctagon, CheckCircle, Cpu, Layers, Eye, Share2 } from 'lucide-react';
-import { MOCK_PC_SCAN_REPORT } from '../constants';
 import { PCScanReport } from '../types';
 
 const PCScanner: React.FC = () => {

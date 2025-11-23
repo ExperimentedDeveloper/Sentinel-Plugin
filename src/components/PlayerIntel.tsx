@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Search, User, ShieldAlert, MapPin, Globe, Ban, Box, Users, FileText, CheckCircle, Link, RefreshCw, Trash2, Copy, Check } from 'lucide-react';
-import { MOCK_PLAYER_PROFILE } from '../constants';
 
 const PlayerIntel: React.FC = () => {
   const [search, setSearch] = useState('');

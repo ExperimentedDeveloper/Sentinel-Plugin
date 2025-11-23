@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Gavel, MessageSquare, Eye, EyeOff, Shield, Zap, AlertTriangle, CheckCircle, Ghost, Snowflake, Scan, Crosshair, Map, Navigation, Lock, Key, Layers, RefreshCw, History, Archive, Bell, User, Settings, Binary, Wand2, MousePointer2, Compass, Flame, CloudLightning, Box, Grid, Hammer, Ban, Bot } from 'lucide-react';
-import { MOCK_STAFF, MOCK_REPORTS, MOCK_SNAPSHOTS } from '../constants';
 import { InventorySnapshot } from '../types';
 
 interface StaffMessage {

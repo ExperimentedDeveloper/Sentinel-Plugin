@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { ShieldCheck, AlertTriangle, CheckCircle, FileText, Download, RefreshCw, Server, Lock, Database, Shield } from 'lucide-react';
-import { MOCK_AUDIT_FINDINGS } from '../constants';
 import { AuditReport } from '../types';
 
 const SecurityAuditor: React.FC = () => {
